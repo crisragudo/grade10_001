@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Lesson Plan: File I/O</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is structured as a guided, vertical journey through the 40-minute lesson plan. It begins with a clear overview (Objectives & Materials), moves into the core lesson content segmented by time (Intro, Development, Wrap-up), and uses interactive elements like toggles and clickable cards to reveal information. This linear, scroll-based flow mimics the natural progression of a class, making it intuitive for teachers to follow or for students to review. The structure was chosen for its simplicity and direct translation of a time-based plan into an explorable digital format. -->
+    <!-- Visualization & Content Choices: 
+        - Lesson Flow Chart: Report Info -> Lesson Plan Sections (Intro, Dev, etc.). Goal -> Organize. Viz/Presentation Method -> Interactive Diagram (HTML/CSS/Tailwind). Interaction -> Hover to highlight stages. Justification -> Visually represents the lesson's structure and timing, providing a quick mental map. Library/Method -> Tailwind CSS, JS.
+        - Core Concepts (Read vs. Write): Report Info -> Analogies for reading/writing files. Goal -> Compare. Viz/Presentation Method -> Side-by-side cards. Interaction -> Click to flip or reveal details. Justification -> Allows for direct comparison and active engagement with the core concepts. Library/Method -> HTML/CSS, JS.
+        - Time Allocation Chart: Report Info -> Time allotment for each section (5, 20, 10 mins). Goal -> Inform/Compare. Viz/Presentation Method -> Donut Chart. Interaction -> Hover over segments to see details. Justification -> Provides a quick, visual breakdown of how the class time is managed. Library/Method -> Chart.js (Canvas).
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .section-card {
+            background-color: #FFFFFF;
+            border: 1px solid #EAEAEA;
+            transition: all 0.3s ease;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .nav-button {
+            transition: all 0.2s ease;
+        }
+        .nav-button.active {
+            background-color: #A59481;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        .nav-button:not(.active):hover {
+            background-color: #EFEBE7;
+        }
+        .concept-card {
+            perspective: 1000px;
+        }
+        .concept-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .concept-card.is-flipped .concept-card-inner {
+            transform: rotateY(180deg);
+        }
+        .concept-card-front, .concept-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #EAEAEA;
+        }
+        .concept-card-front {
+            background-color: #F5F1ED;
+        }
+        .concept-card-back {
+            background-color: #FFFFFF;
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl">
+
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-[#6D5D4D]">Interactive Lesson Plan</h1>
+            <p class="text-lg md:text-xl mt-2 text-[#A59481]">Grade 10: File I/O (Input/Output)</p>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="flex justify-center mb-12 bg-white p-2 rounded-full shadow-sm sticky top-4 z-10">
+            <a href="#overview" class="nav-button active text-sm sm:text-base px-4 py-2 rounded-full">Overview</a>
+            <a href="#introduction" class="nav-button text-sm sm:text-base px-4 py-2 rounded-full">Introduction</a>
+            <a href="#development" class="nav-button text-sm sm:text-base px-4 py-2 rounded-full">Development</a>
+            <a href="#wrapup" class="nav-button text-sm sm:text-base px-4 py-2 rounded-full">Wrap-up</a>
+        </nav>
+
+        <!-- Overview Section -->
+        <section id="overview" class="mb-16 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-6 text-center text-[#6D5D4D]">Lesson Overview</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="section-card p-6 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-[#A59481]">🎯 Learning Objectives</h3>
+                    <ul id="objectives-list" class="space-y-3 text-gray-700">
+                        <!-- Objectives will be populated by JS -->
+                    </ul>
+                </div>
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="section-card p-6 rounded-lg">
+                        <h3 class="text-xl font-semibold mb-4 text-[#A59481]">📋 Materials Needed</h3>
+                        <ul id="materials-list" class="space-y-3 text-gray-700">
+                           <!-- Materials will be populated by JS -->
+                        </ul>
+                    </div>
+                    <div class="section-card p-6 rounded-lg">
+                        <h3 class="text-xl font-semibold mb-4 text-[#A59481]">⏳ Time Allocation (40 mins)</h3>
+                        <div class="chart-container mx-auto" style="position: relative; height:200px; max-width:200px;">
+                            <canvas id="timeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Introduction Section -->
+        <section id="introduction" class="mb-16 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-2 text-center text-[#6D5D4D]">A. Introduction</h2>
+            <p class="text-center text-gray-500 mb-6">(5 Minutes)</p>
+            <div class="section-card p-8 rounded-lg">
+                 <p class="mb-6 text-center text-lg">This section introduces the core idea of persistent data storage through relatable questions, setting the stage for understanding why File I/O is a fundamental concept in programming.</p>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-lg text-[#A59481]">Teacher's Activity:</h4>
+                        <p>Greet students and briefly review the previous lesson on basic programming syntax.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-[#A59481]">Motivation Questions:</h4>
+                        <div class="flex flex-col md:flex-row gap-4 mt-2">
+                            <div class="flex-1 bg-gray-50 p-4 rounded-md border">"When you save a document in Google Docs or Microsoft Word, where does it go?"</div>
+                            <div class="flex-1 bg-gray-50 p-4 rounded-md border">"How does a video game remember your high score after you close it?"</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-lg text-[#A59481]">Defining File I/O:</h4>
+                        <p>Using a simple diagram, define **File I/O** as the process of a program interacting with files. Explain that 'I' is for **Input** (reading from a file) and 'O' is for **Output** (writing to a file).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Development Section -->
+        <section id="development" class="mb-16 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-2 text-center text-[#6D5D4D]">B. Development of the Lesson</h2>
+            <p class="text-center text-gray-500 mb-6">(20 Minutes)</p>
+            
+            <div class="section-card p-8 rounded-lg mb-8">
+                <h3 class="text-xl font-semibold text-center mb-6 text-[#A59481]">1. Explaining "Reading" vs. "Writing" (10 mins)</h3>
+                <p class="mb-8 text-center text-lg">This part breaks down the two core operations of File I/O using simple analogies and code snippets. The interactive cards encourage active participation to reveal the definitions.</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Writing Card -->
+                    <div class="concept-card h-80 cursor-pointer" onclick="this.classList.toggle('is-flipped')">
+                        <div class="concept-card-inner">
+                            <div class="concept-card-front">
+                                <h4 class="text-2xl font-bold text-[#6D5D4D]">Writing (Output)</h4>
+                                <p class="mt-2 text-gray-600">Click to see the analogy</p>
+                            </div>
+                            <div class="concept-card-back text-center">
+                                <p class="mb-2"><strong>Analogy:</strong> A student writes a letter and puts it in an envelope to save it.</p>
+                                <p class="mb-4 text-sm text-gray-500">(Program -> Data -> File)</p>
+                                <p class="font-mono bg-gray-100 p-2 rounded text-sm">file.write('Hello, World!')</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Reading Card -->
+                    <div class="concept-card h-80 cursor-pointer" onclick="this.classList.toggle('is-flipped')">
+                        <div class="concept-card-inner">
+                            <div class="concept-card-front">
+                                <h4 class="text-2xl font-bold text-[#6D5D4D]">Reading (Input)</h4>
+                                <p class="mt-2 text-gray-600">Click to see the analogy</p>
+                            </div>
+                            <div class="concept-card-back text-center">
+                                <p class="mb-2"><strong>Analogy:</strong> A student opens an envelope to read the letter inside.</p>
+                                <p class="mb-4 text-sm text-gray-500">(File -> Data -> Program)</p>
+                                <p class="font-mono bg-gray-100 p-2 rounded text-sm">file.read()</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card p-8 rounded-lg">
+                <h3 class="text-xl font-semibold text-center mb-6 text-[#A59481]">2. Visual and Interactive Activity (10 mins)</h3>
+                <p class="mb-8 text-center text-lg">This activity simulates the File I/O process in a hands-on, collaborative way. It's designed to be performed in a classroom without computers, solidifying the abstract concepts through role-playing.</p>
+                <div class="bg-gray-50 p-6 rounded-lg border">
+                    <h4 class="font-bold text-lg mb-2">Scenario:</h4>
+                    <p class="mb-4">"A program needs to keep track of a student's top 5 favorite Filipino foods."</p>
+                    <h4 class="font-bold text-lg mb-2">Simulation Steps:</h4>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li><strong>Divide & Role-Play:</strong> Form groups. Each group is a "program." One student is the "processor," another is the "file."</li>
+                        <li><strong>Writing (Output):</strong> The "processor" gives a list of 5 Filipino foods to the "file" student. The "file" writes this list on paper (the "text file").</li>
+                        <li><strong>Reading (Input):</strong> The "processor" asks the "file" to retrieve the list. The "file" student hands the paper back to be read.</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wrap-up Section -->
+        <section id="wrapup" class="scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-2 text-center text-[#6D5D4D]">C. Discussion and Wrap-up</h2>
+            <p class="text-center text-gray-500 mb-6">(10 Minutes)</p>
+             <div class="section-card p-8 rounded-lg">
+                <p class="mb-8 text-center text-lg">The final phase of the lesson reinforces the learning through discussion and a quick, individual assessment. It ensures students can articulate the key concepts in their own words.</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 text-[#A59481]">🗣️ Discussion</h3>
+                        <p class="font-semibold mb-2">Why is File I/O important?</p>
+                        <p class="bg-gray-50 p-4 rounded-md border">It allows data to be persistent. This means data is not lost when the program closes, unlike data stored only in the computer's temporary memory (RAM).</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 text-[#A59481]">✍️ Individual Assessment</h3>
+                        <p class="mb-2">Students answer in their notebooks:</p>
+                        <ol class="list-decimal list-inside space-y-2 bg-gray-50 p-4 rounded-md border">
+                            <li>In your own words, what is the difference between reading from and writing to a file?</li>
+                            <li>Give one real-world example of File I/O in an application you use.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Data from the lesson plan
+            const lessonData = {
+                objectives: [
+                    "Explain the concepts of File Input and Output (I/O) in programming.",
+                    "Differentiate between reading from a file and writing to a file.",
+                    "Analyze the real-world applications of File I/O.",
+                    "Collaborate in a group activity to demonstrate the File I/O process."
+                ],
+                materials: [
+                    "LCD Projector",
+                    "Whiteboard/Marker",
+                    "Visual Aids (diagrams)",
+                    "Student Notebooks"
+                ],
+                timeAllocation: {
+                    labels: ['Introduction', 'Development', 'Wrap-up'],
+                    data: [5, 20, 10],
+                    colors: ['#A59481', '#6D5D4D', '#EFEBE7']
+                }
+            };
+
+            // Populate Objectives
+            const objectivesList = document.getElementById('objectives-list');
+            lessonData.objectives.forEach(obj => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="text-[#A59481] mr-2">✓</span>${obj}`;
+                objectivesList.appendChild(li);
+            });
+
+            // Populate Materials
+            const materialsList = document.getElementById('materials-list');
+            lessonData.materials.forEach(mat => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span class="text-[#A59481] mr-2">▪</span>${mat}`;
+                materialsList.appendChild(li);
+            });
+
+            // Create Time Allocation Chart
+            const ctx = document.getElementById('timeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: lessonData.timeAllocation.labels,
+                    datasets: [{
+                        label: 'Time Allocation',
+                        data: lessonData.timeAllocation.data,
+                        backgroundColor: lessonData.timeAllocation.colors,
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + ' mins';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Smooth Scrolling and Active Nav State
+            const navLinks = document.querySelectorAll('nav a');
+            const sections = document.querySelectorAll('section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.4
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
