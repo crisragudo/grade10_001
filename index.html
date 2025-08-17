@@ -8,11 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Warm Neutrals -->
-    <!-- Application Structure Plan: The application is structured as a guided, vertical journey through the 40-minute lesson plan. It begins with a clear overview (Objectives & Materials), moves into the core lesson content segmented by time (Intro, Development, Wrap-up), and uses interactive elements like toggles and clickable cards to reveal information. This linear, scroll-based flow mimics the natural progression of a class, making it intuitive for teachers to follow or for students to review. The structure was chosen for its simplicity and direct translation of a time-based plan into an explorable digital format. -->
+    <!-- Application Structure Plan: The application is structured as a guided, vertical journey through the 40-minute lesson plan. It begins with a clear overview (Objectives & Materials), moves into the core lesson content segmented by time (Intro, Development, Wrap-up), and uses interactive elements like toggles and clickable cards to reveal information. This linear, scroll-based flow mimics the natural progression of a class, making it intuitive for teachers to follow or for students to review. The structure was chosen for its simplicity and direct translation of a time-based plan into an explorable digital format. The new quiz section at the end provides a clear assessment component. -->
     <!-- Visualization & Content Choices: 
         - Lesson Flow Chart: Report Info -> Lesson Plan Sections (Intro, Dev, etc.). Goal -> Organize. Viz/Presentation Method -> Interactive Diagram (HTML/CSS/Tailwind). Interaction -> Hover to highlight stages. Justification -> Visually represents the lesson's structure and timing, providing a quick mental map. Library/Method -> Tailwind CSS, JS.
         - Core Concepts (Read vs. Write): Report Info -> Analogies for reading/writing files. Goal -> Compare. Viz/Presentation Method -> Side-by-side cards. Interaction -> Click to flip or reveal details. Justification -> Allows for direct comparison and active engagement with the core concepts. Library/Method -> HTML/CSS, JS.
         - Time Allocation Chart: Report Info -> Time allotment for each section (5, 20, 10 mins). Goal -> Inform/Compare. Viz/Presentation Method -> Donut Chart. Interaction -> Hover over segments to see details. Justification -> Provides a quick, visual breakdown of how the class time is managed. Library/Method -> Chart.js (Canvas).
+        - Quiz Questions: Report Info -> Assessment questions and answers. Goal -> Assess/Test. Viz/Presentation Method -> Collapsible list of questions. Interaction -> Click a button to show/hide the answers. Justification -> Provides a straightforward way to test comprehension while allowing for immediate self-correction. Library/Method -> HTML/CSS, JS.
         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
@@ -92,6 +93,7 @@
             <a href="#introduction" class="nav-button text-sm sm:text-base px-4 py-2 rounded-full">Introduction</a>
             <a href="#development" class="nav-button text-sm sm:text-base px-4 py-2 rounded-full">Development</a>
             <a href="#wrapup" class="nav-button text-sm sm:text-base px-4 py-2 rounded-full">Wrap-up</a>
+            <a href="#quiz" class="nav-button text-sm sm:text-base px-4 py-2 rounded-full">Quiz</a>
         </nav>
 
         <!-- Overview Section -->
@@ -204,7 +206,7 @@
         </section>
 
         <!-- Wrap-up Section -->
-        <section id="wrapup" class="scroll-mt-24">
+        <section id="wrapup" class="mb-16 scroll-mt-24">
             <h2 class="text-2xl font-bold mb-2 text-center text-[#6D5D4D]">C. Discussion and Wrap-up</h2>
             <p class="text-center text-gray-500 mb-6">(10 Minutes)</p>
              <div class="section-card p-8 rounded-lg">
@@ -223,6 +225,39 @@
                             <li>Give one real-world example of File I/O in an application you use.</li>
                         </ol>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quiz" class="mb-16 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-6 text-center text-[#6D5D4D]">Quiz: File I/O Fundamentals</h2>
+            <div class="section-card p-8 rounded-lg">
+                <p class="mb-6 text-center text-lg">Test your understanding with these five questions based on the lesson plan. You can reveal the answers at the end.</p>
+                <div class="space-y-6">
+                    <div>
+                        <p class="font-semibold text-lg text-[#A59481]">1. In your own words, define File I/O.</p>
+                        <p class="mt-2 text-gray-700 font-medium hidden" id="answer1">Answer: File I/O is the process of a program interacting with a file by either reading data from it or writing data to it.</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-lg text-[#A59481]">2. Imagine a program needs to save a new high score. Is this an example of reading or writing?</p>
+                        <p class="mt-2 text-gray-700 font-medium hidden" id="answer2">Answer: This is an example of **writing**, because the program is sending data (the new high score) to the file.</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-lg text-[#A59481]">3. What does the "I" in File I/O stand for?</p>
+                        <p class="mt-2 text-gray-700 font-medium hidden" id="answer3">Answer: The "I" stands for **Input**.</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-lg text-[#A59481]">4. What does the "O" in File I/O stand for?</p>
+                        <p class="mt-2 text-gray-700 font-medium hidden" id="answer4">Answer: The "O" stands for **Output**.</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-lg text-[#A59481]">5. What is the main benefit of using File I/O?</p>
+                        <p class="mt-2 text-gray-700 font-medium hidden" id="answer5">Answer: The main benefit is that it allows data to be **persistent**, meaning the data is not lost when the program closes.</p>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-center">
+                    <button id="showAnswersButton" class="bg-[#A59481] text-white font-semibold py-3 px-6 rounded-full shadow-md hover:bg-[#6D5D4D] transition-colors">Show All Answers</button>
                 </div>
             </div>
         </section>
@@ -340,6 +375,15 @@
                         behavior: 'smooth'
                     });
                 });
+            });
+
+            // Quiz logic
+            document.getElementById('showAnswersButton').addEventListener('click', function() {
+                const answers = document.querySelectorAll('[id^="answer"]');
+                answers.forEach(answer => {
+                    answer.classList.remove('hidden');
+                });
+                this.remove();
             });
         });
     </script>
